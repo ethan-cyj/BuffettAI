@@ -28,5 +28,9 @@ scrapy
 
 # Additional Packages for the RAG Pipeline
 langchain
+langchain-community
+langchain-openai
 faiss-cpu
 rank_bm25
+tf-keras
+tiktoken
