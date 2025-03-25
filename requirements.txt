@@ -1,0 +1,32 @@
+# Core Data Science Libraries
+numpy
+scipy
+pandas
+scikit-learn
+
+# NLP Libraries
+nltk
+spacy
+transformers
+sentence-transformers
+torch
+tensorflow
+openai
+
+# Visualization
+matplotlib
+seaborn
+plotly
+
+# Data Preprocessing
+beautifulsoup4
+openpyxl
+
+# Web Scraping (Optional)
+requests
+scrapy
+
+# Additional Packages for the RAG Pipeline
+langchain
+faiss-cpu
+rank_bm25
