@@ -1,8 +1,9 @@
 import numpy as np
 from rank_bm25 import BM25Okapi
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.vectorstores import FAISS
-from langchain.retrievers import BM25Retriever, EnsembleRetriever
+from langchain_community.vectorstores import FAISS
+from langchain_community.retrievers import BM25Retriever
+from langchain_openai import OpenAIEmbeddings
+from langchain.retrievers import EnsembleRetriever
 
 # Compare 2 different retrieval methods and evaluate
 

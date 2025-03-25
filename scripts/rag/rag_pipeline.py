@@ -1,13 +1,22 @@
 import os
-import openai  # You might remove this if not needed anymore for generation
+from dotenv import load_dotenv
+import openai 
 from rag.text_splitter import split_documents
 from rag.retrieval import build_bm25, build_faiss_index, create_ensemble_retriever
 from rag.reranker import rerank_documents
 from rag.prompt_engineering import create_prompt, create_evaluation_prompt
 
-# Import your custom LLM function here; for now we use a placeholder.
-# For example, from buffettai.custom_llm import call_custom_llm
+from langchain_community.retrievers import BM25Retriever
 
+# load env variables from .env
+load_dotenv()
+
+# set OpenAI API key
+openai.api_key = os.getenv("OPENAI_API_KEY")
+if not openai.api_key:
+    raise ValueError("API key is not set")
+
+# call custom LLM
 def call_custom_llm(prompt: str, context: str = "") -> str:
     """
     Placeholder function to call your custom LLM (@ethan, @yucai)
@@ -33,9 +42,10 @@ class RAGPipeline:
         self.documents = split_documents(raw_documents)
         
         # Build BM25 retriever.
-        corpus = [doc["content"] for doc in self.documents]
+        corpus = [doc.page_content for doc in self.documents]  
+
         bm25_model = build_bm25(corpus)
-        from langchain.retrievers import BM25Retriever
+        
         self.bm25_retriever = BM25Retriever.from_documents(self.documents)
         self.bm25_retriever.k = 5
         
