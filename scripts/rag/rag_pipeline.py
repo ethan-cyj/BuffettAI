@@ -76,7 +76,11 @@ class RAGPipeline:
         context_text = "\n".join(self.context_memory)
         
         report = self.generate_text(prompt, context=context_text)
+        report = self.generate_text(prompt, context=context_text)
         
+        # Update context memory
+        self.context_memory.append(f"Query: {query}")
+        self.context_memory.append(f"Report: {report[:200]}...")
         # Update context memory
         self.context_memory.append(f"Query: {query}")
         self.context_memory.append(f"Report: {report[:200]}...")
@@ -85,6 +89,7 @@ class RAGPipeline:
 
     def evaluate_report(self, query: str, report: str, documents: List[Document]) -> str:
         """
+        Evaluates the generated report.
         Evaluates the generated report.
         """
         eval_prompt = create_evaluation_prompt(query, report, documents)
