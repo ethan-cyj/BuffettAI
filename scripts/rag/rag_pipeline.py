@@ -1,121 +1,106 @@
 import os
 from dotenv import load_dotenv
-import openai 
-from rag.text_splitter import split_documents
-from rag.retrieval import build_bm25, build_faiss_index, create_ensemble_retriever
-from rag.reranker import rerank_documents
-from rag.prompt_engineering import create_prompt, create_evaluation_prompt
+from openai import OpenAI
+from typing import List, Dict, Any, Optional, Callable
+from langchain_core.documents import Document
+from retrieval import main_intialise_retrievers
+from prompt_engineering import create_prompt, create_evaluation_prompt
+from agent import main_routing_function
 
-from langchain_community.retrievers import BM25Retriever
 
 # load env variables from .env
 load_dotenv()
 
-# set OpenAI API key
-openai.api_key = os.getenv("OPENAI_API_KEY")
-if not openai.api_key:
-    raise ValueError("API key is not set")
-
-# call custom LLM
-def call_custom_llm(prompt: str, context: str = "") -> str:
-    """
-    Placeholder function to call your custom LLM (@ethan, @yucai)
-    The function should take a prompt and optional context, then return a generated text.
-    In production, replace this with the actual API call or function to your LLM.
-    """
-    # For demonstration, we simply return the prompt combined with context.
-    # Replace this with your actual generation call.
-    combined_input = context + "\n" + prompt if context else prompt
-    return "Custom LLM Response based on:\n" + combined_input
-
 class RAGPipeline:
-    def __init__(self, raw_documents):
+    def __init__(
+        self, 
+        llm_type: str = "openai",  # "openai" or "custom"
+        custom_llm: Optional[Callable] = None,
+    ):
         """
-        Initializes the pipeline:
-         - Splits raw documents into text chunks.
-         - Builds BM25 and FAISS retrievers.
-         - Combines them into an ensemble retriever.
-         - Initializes a context memory for feedback loop.
-        Expects raw_documents as a list of dicts with at least a 'content' field.
+        Initialize RAG pipeline with LLM options.
+        
+        Args:
+            llm_type: "openai" or "custom"
+            custom_llm: Function(prompt: str, context: str) -> str
         """
-        # Split documents into chunks.
-        self.documents = split_documents(raw_documents)
-        
-        # Build BM25 retriever.
-        corpus = [doc.page_content for doc in self.documents]  
-
-        bm25_model = build_bm25(corpus)
-        
-        self.bm25_retriever = BM25Retriever.from_documents(self.documents)
-        self.bm25_retriever.k = 5
-        
-        # Build FAISS retriever.
-        faiss_vectorstore = build_faiss_index(self.documents)
-        self.faiss_retriever = faiss_vectorstore.as_retriever(search_kwargs={"k": 5})
-        
-        # Create an ensemble retriever.
-        self.ensemble_retriever = create_ensemble_retriever(self.bm25_retriever, self.faiss_retriever)
-        
-        # Initialize context memory for feedback loop (stores conversation history).
         self.context_memory = []
+        self.llm_type = llm_type
+        self.custom_llm = custom_llm
+        
+        if llm_type == "openai":
+            self.client = OpenAI()
+        
+        self._initialize_retrievers()
 
-    def retrieve_and_rerank(self, query: str, retriever, top_k: int = 5):
-        """
-        Retrieves documents using the provided retriever and then reranks them.
-        """
-        docs = retriever.get_relevant_documents(query)
-        return rerank_documents(query, docs, top_k=top_k)
+    def _initialize_retrievers(self):
+        """Initialize BM25 and FAISS retrievers"""
+        main_intialise_retrievers()
     
-    def generate_report(self, query: str, company_name: str, retriever):
+    def generate_text(self, prompt: str, context: str = "") -> str:
         """
-        Retrieves documents, creates a prompt, adds context from previous interactions,
-        and uses the custom LLM to generate a report.
+        Unified text generation interface.
+        Routes to OpenAI or custom LLM based on configuration.
         """
-        # Retrieve and rerank documents.
-        retrieved_docs = self.retrieve_and_rerank(query, retriever)
-        
-        # Create the base prompt using the retrieved documents.
-        prompt = create_prompt(company_name, retrieved_docs)
-        
-        # Incorporate feedback context (if any) into the prompt.
-        # Here we simply concatenate the context memory into a single string.
+        if self.llm_type == "custom" and self.custom_llm:
+            return self.custom_llm(prompt, context)
+        elif self.llm_type == "openai":
+            return self._call_openai(prompt, context)
+        else:
+            raise ValueError("Invalid LLM configuration")
+
+    def _call_openai(self, prompt: str, context: str = "") -> str:
+        """Internal method for OpenAI API calls"""
+        try:
+            messages = []
+            if context:
+                messages.append({"role": "system", "content": context})
+            messages.append({"role": "user", "content": prompt})
+            
+            response = self.client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=messages,
+                temperature=0.7,
+                max_tokens=1500
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            print(f"Error calling OpenAI: {e}")
+            return f"Error generating response: {str(e)}"
+
+    def generate_report(self, query: str, company_name: str, documents: Optional[List[Document]] = None) -> tuple:
+        """
+        Generates a report using retrieved documents.
+        """
+        prompt = create_prompt(query, company_name, documents)
         context_text = "\n".join(self.context_memory)
         
-        # Call your custom LLM with the prompt and context.
-        report = call_custom_llm(prompt, context=context_text)
+        report = self.generate_text(prompt, context=context_text)
         
-        # Update context memory: you can choose to store just the query/response pair
-        # or additional details. Here, we store the generated report.
-        self.context_memory.append(f"User Query: {query}")
-        self.context_memory.append(f"LLM Report: {report}")
+        # Update context memory
+        self.context_memory.append(f"Query: {query}")
+        self.context_memory.append(f"Report: {report[:200]}...")
         
-        return report, retrieved_docs
+        return report
 
-    def evaluate_report(self, query: str, report: str, retrieved_docs):
+    def evaluate_report(self, query: str, report: str, documents: List[Document]) -> str:
         """
-        Uses the custom LLM (or another LLM) to evaluate the generated report.
-        This function calls the evaluation prompt and returns the evaluation.
+        Evaluates the generated report.
         """
-        eval_prompt = create_evaluation_prompt(query, report, retrieved_docs)
-        # You could also use your custom LLM here, but for now, we call the placeholder.
-        evaluation = call_custom_llm(eval_prompt)
-        return evaluation
+        eval_prompt = create_evaluation_prompt(query, report, documents)
+        return self.generate_text(eval_prompt)
 
-    def process_query(self, query: str, company_name: str, method: str = "ensemble"):
+    def process_query(self, query: str, company_name: str) -> tuple:
         """
-        Processes the query using one of the retrieval methods:
-          - "bm25": BM25 only.
-          - "faiss": FAISS only.
-          - "ensemble": Ensemble (BM25 + FAISS).
-        Returns the generated report and its evaluation.
+        Main method to process a query through the RAG pipeline.
         """
-        if method == "bm25":
-            retriever = self.bm25_retriever
-        elif method == "faiss":
-            retriever = self.faiss_retriever
-        else:
-            retriever = self.ensemble_retriever
+        documents = main_routing_function(query)
+        report = self.generate_report(query, company_name, documents)
+        evaluation = self.evaluate_report(query, report, documents)
         
-        report, retrieved_docs = self.generate_report(query, company_name, retriever)
-        evaluation = self.evaluate_report(query, report, retrieved_docs)
         return report, evaluation
+    
+
+# testing
+# rag_pipeline = RAGPipeline()
+# print(rag_pipeline.process_query("What did Buffett say about Tesla?", "Tesla"))

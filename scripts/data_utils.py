@@ -256,6 +256,7 @@ def load_all_documents(
     
     return all_docs
 
+
 # print(f"Script running from: {os.getcwd()}")
 
 # print(load_documents("../data/news.pkl"))

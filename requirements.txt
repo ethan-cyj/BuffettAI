@@ -34,3 +34,5 @@ faiss-cpu
 rank_bm25
 tf-keras
 tiktoken
+
+googlesearch-python

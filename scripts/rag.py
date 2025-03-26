@@ -2,6 +2,7 @@ import argparse
 import os
 from data_utils import load_documents, load_all_documents, inspect_file
 from rag.rag_pipeline import RAGPipeline
+from rag.retrieval import initialize_faiss_databases
 
 def main():
     print(f"Script running from: {os.getcwd()}")
@@ -43,8 +44,11 @@ def main():
     if args.load_all:
         print("Loading all standard documents from data/ directory...")
         raw_docs = load_all_documents(base_path="../data")
+        vectorstores = initialize_faiss_databases(raw_docs)
     else:
+        doc_name = os.path.basename(args.data_path)
         raw_docs = load_documents(args.data_path)
+        vectorstores = initialize_faiss_databases({doc_name: raw_docs})
     
     # Initialize and run pipeline
     pipeline = RAGPipeline(raw_docs)
