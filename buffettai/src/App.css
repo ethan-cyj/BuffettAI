@@ -9,6 +9,38 @@ body {
   height: 100vh;
 }
 
+.tab-buttons {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.tab-buttons button {
+  background-color: #2E3192;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-right: 10px;
+  font-size: 16px;
+}
+
+/* Style for the close button in the tab */
+.close-tab-btn {
+  margin-left: -5px;
+  background-color: red; /* No background */
+  color: #fff; /* You can change this color */
+  border: none; /* No border */
+  font-size: 16px; /* Adjust the size of the 'X' */
+  cursor: pointer; /* Makes it clickable */
+  padding: 0; /* Remove padding */
+  line-height: 0; /* Ensures no extra space around the X */
+}
+
+.tab-buttons button.active {
+  background-color: #003366; /* Darker color for the active tab */
+}
+
 .chat-container {
   display: flex;
   flex-direction: column;
@@ -24,9 +56,9 @@ body {
 }
 
 .chat-header {
-  background-color: #2E3192; /* Keep brand color */
-  color: #fff;
-  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  background-color: #fff; /* Keep brand color */
+  color: #003366;
+  font-family: 'Times New Roman', Times, serif;
   padding: 1rem;
   text-align: center;
   border-top-left-radius: 8px;
@@ -92,4 +124,71 @@ body {
 
 .chat-input button:hover {
   background-color: #0056b3;
+}
+
+.instructions-btn {
+  position: absolute;
+  top: 60px;
+  right: 480px;
+  background-color: #2E3192; /* Brand color */
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* Styling for the modal */
+.instructions-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 300px;
+  text-align: center;
+  color: #000000;
+}
+
+.modal-content h3 {
+  margin-bottom: 10px;
+}
+
+.modal-content p {
+  margin-bottom: 20px;
+}
+
+.modal-content button {
+  background-color: #2E3192; /* Brand color */
+  color: #fff;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* Styling for the new tab button */
+.new-tab-btn {
+  position: absolute;
+  top: 20px;
+  right: 100px; /* Adjust the position as needed */
+  background-color: #2E3192; /* Brand color */
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
 }
