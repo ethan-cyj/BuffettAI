@@ -28,7 +28,7 @@ function App() {
   return (
     <div className="chat-container">
       <header className="chat-header">
-        <h1>BuffettAI</h1>
+        <h1>B u f f e t t . A I</h1>
       </header>
       <div className="chat-messages">
         {messages.map((msg, index) => (
