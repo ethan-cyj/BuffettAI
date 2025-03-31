@@ -18,7 +18,7 @@ body {
   background-color: #2E3192;
   color: #fff;
   border: none;
-  padding: 10px 20px;
+  padding: 10px 40px;
   border-radius: 5px;
   cursor: pointer;
   margin-right: 10px;
@@ -26,15 +26,16 @@ body {
 }
 
 /* Style for the close button in the tab */
-.close-tab-btn {
-  margin-left: -5px;
-  background-color: red; /* No background */
-  color: #fff; /* You can change this color */
+.tab-buttons .close-tab-btn {
+  margin-left: -25px;
+  /* background-color: red; No background */
+  color: red; /* You can change this color */
   border: none; /* No border */
-  font-size: 16px; /* Adjust the size of the 'X' */
+  font-size: 20px; /* Adjust the size of the 'X' */
   cursor: pointer; /* Makes it clickable */
   padding: 0; /* Remove padding */
   line-height: 0; /* Ensures no extra space around the X */
+  font-weight:bold;
 }
 
 .tab-buttons button.active {

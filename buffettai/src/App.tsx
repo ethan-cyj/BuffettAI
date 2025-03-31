@@ -1,23 +1,24 @@
 import { useState } from 'react';
 import './App.css';
+import logo_img from "./assets/logo.png";
 
 function App() {
   // State to track active tab and messages for each tab
-  const [activeTab, setActiveTab] = useState('tab1');
+  const [activeTab, setActiveTab] = useState('Conversation 1');
   const [messages, setMessages] = useState<{ [key: string]: { sender: string; text: string }[] }>({
-    tab1: [{ sender: 'bot', text: 'Welcome! How can I help you today?' }],
+    'Conversation 1': [{ sender: 'bot', text: 'Welcome! How can I help you today?' }],
   });
   const [input, setInput] = useState('');
   const [showInstructions, setShowInstructions] = useState(false);
 
   const generateTabName = () => {
     let tabNumber = 1; // Start with 1
-    let newTab = `tab${tabNumber}`; // Initial tab name
+    let newTab = `Conversation ${tabNumber}`; // Initial tab name
   
     // Check if the tab already exists, and increment the number if it does
     while (Object.keys(messages).includes(newTab)) {
       tabNumber += 1;
-      newTab = `tab${tabNumber}`; // Update the tab name with the incremented number
+      newTab = `Conversation ${tabNumber}`; // Update the tab name with the incremented number
     }
   
     return newTab;
@@ -86,10 +87,12 @@ function App() {
   return (
     <div className="chat-container">
       <header className="chat-header">
-        <h1 style={{ marginBottom: "-35px"}}>
+        <img src={logo_img} style={{ width: "auto", height: "auto", marginTop: "-175px", marginBottom: "-335px"}}/>
+        {/* <h1 style={{ marginBottom: "-35px"}}>
           <span style={{ fontSize: '100px' }}>B</span> u f f e t t .
           <span style={{ fontSize: '100px' }}> A I</span>
-        </h1>
+        </h1> */}
+        <h1 style={{ marginBottom: "50px"}}>&nbsp;</h1>
         <h2> Buffett’s Secrets, Now in the Cloud.</h2>
       </header>
       {/* Instructions */}
