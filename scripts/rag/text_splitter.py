@@ -1,5 +1,6 @@
 import pandas as pd
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+import os
 
 
 CHUNK_SIZE = 1024
@@ -16,7 +17,7 @@ def recursive_split_documents(documents):
     # You might need to convert these dicts to the Document type expected by langchain.
     return splitter.split_documents(documents)
 
-def chunk_qna_data(file_path="data/buffet_qna.xlsx"):
+def chunk_qna_data(file_path="../data/buffet_qna.xlsx"):
     """
     Reads an Excel file and groups the data by Section,
     where each chunk is a text block containing the question-answer pairs.
@@ -46,7 +47,7 @@ def chunk_qna_data(file_path="data/buffet_qna.xlsx"):
     
     return chunks
 
-def chunk_trades(file_path="data/brka_trades.xlsx", group_by_column="RIC"):
+def chunk_trades(file_path="../data/brka_trades.xlsx", group_by_column="RIC"):
     """
     Reads an Excel file containing trade data and chunks the data into text blocks.
     
@@ -61,6 +62,7 @@ def chunk_trades(file_path="data/brka_trades.xlsx", group_by_column="RIC"):
         Otherwise, returns a list of text strings (each string represents one trade record).
     """
     # Read the Excel file into a pandas DataFrame
+    print(f"chunk script running from: {os.getcwd()}")
     df = pd.read_excel(file_path)
     
     # If no grouping is specified, return each row as a separate text chunk.

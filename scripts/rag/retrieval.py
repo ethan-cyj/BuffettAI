@@ -8,16 +8,16 @@ from langchain_community.vectorstores import FAISS
 from langchain_community.retrievers import BM25Retriever
 from langchain_openai import OpenAIEmbeddings
 from langchain.retrievers import EnsembleRetriever
-from langchain.embeddings import SentenceTransformerEmbeddings
+from langchain_community.embeddings import SentenceTransformerEmbeddings
 from typing import List
 from langchain.schema import Document
-from reranker import rerank_documents
 from sentence_transformers import SentenceTransformer
-from langchain.embeddings import HuggingFaceEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 
-from text_splitter import chunk_trades, chunk_qna_data, RecursiveCharacterTextSplitter
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from data_utils import load_news_pickle, load_shareholder_letters_pickle
+from rag.reranker import rerank_documents
+from rag.text_splitter import chunk_trades, chunk_qna_data, RecursiveCharacterTextSplitter
 
 load_dotenv()
 EXCEL_DATA_SOURCES = ["brka_trades.xlsx", "buffet_qna.xlsx"]
@@ -186,8 +186,8 @@ def main_intialise_retrievers():
     documents_dict = {
         "brka_trades.xlsx": chunk_trades(),
         "buffet_qna.xlsx": chunk_qna_data(),
-        "news.pkl" : RecursiveCharacterTextSplitter().split_documents(load_news_pickle("data/news.pkl")),
-        "shareholder_letters.pkl" : RecursiveCharacterTextSplitter().split_documents(load_shareholder_letters_pickle("data/shareholder_letters.pkl"))
+        "news.pkl" : RecursiveCharacterTextSplitter().split_documents(load_news_pickle("../data/news.pkl")),
+        "shareholder_letters.pkl" : RecursiveCharacterTextSplitter().split_documents(load_shareholder_letters_pickle("../data/shareholder_letters.pkl"))
     }
     initialize_faiss_databases(documents_dict)
     bm25_retrievers = initialise_multiple_bm25_retrievers(documents_dict)

@@ -1,11 +1,15 @@
 import os
+import sys
 from dotenv import load_dotenv
 from openai import OpenAI
 from typing import List, Dict, Any, Optional, Callable
 from langchain_core.documents import Document
-from retrieval import main_intialise_retrievers
-from prompt_engineering import create_prompt, create_evaluation_prompt
-from agent import main_routing_function
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from rag.retrieval import main_intialise_retrievers
+from rag.prompt_engineering import create_prompt, create_evaluation_prompt
+from rag.agent import main_routing_function
 
 
 # load env variables from .env
@@ -35,7 +39,15 @@ class RAGPipeline:
 
     def _initialize_retrievers(self):
         """Initialize BM25 and FAISS retrievers"""
-        main_intialise_retrievers()
+        bm25_index_path = "bm25_indexes"
+        faiss_index_path = "faiss_indexes"
+        bm25_exists = os.path.exists(bm25_index_path) and os.listdir(bm25_index_path)
+        faiss_exists = os.path.exists(faiss_index_path) and os.listdir(faiss_index_path)
+        if bm25_exists and faiss_exists:
+            print("BM25 and FAISS indexes found. Skipping initialization.")
+        else:
+            print("Initializing BM25 and FAISS indexes...")
+            main_intialise_retrievers()
     
     def generate_text(self, prompt: str, context: str = "") -> str:
         """
@@ -76,11 +88,7 @@ class RAGPipeline:
         context_text = "\n".join(self.context_memory)
         
         report = self.generate_text(prompt, context=context_text)
-        report = self.generate_text(prompt, context=context_text)
         
-        # Update context memory
-        self.context_memory.append(f"Query: {query}")
-        self.context_memory.append(f"Report: {report[:200]}...")
         # Update context memory
         self.context_memory.append(f"Query: {query}")
         self.context_memory.append(f"Report: {report[:200]}...")
@@ -107,5 +115,7 @@ class RAGPipeline:
     
 
 # testing
-# rag_pipeline = RAGPipeline()
-# print(rag_pipeline.process_query("What did Buffett say about Tesla?", "Tesla"))
+print(os.path.dirname(os.path.abspath(__file__)))
+print(f"Script running from: {os.getcwd()}")
+rag_pipeline = RAGPipeline()
+print(rag_pipeline.process_query("What did Buffett say about Tesla?", "Tesla"))

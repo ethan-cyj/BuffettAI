@@ -1,5 +1,7 @@
 import json
 import requests
+import os
+import sys
 from typing import Optional, List
 from googlesearch import search
 from bs4 import BeautifulSoup
@@ -9,9 +11,11 @@ from datetime import datetime
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from text_splitter import RecursiveCharacterTextSplitter
-from retrieval import load_faiss_index, main_retrieval_agent
-from llm_config.rag_tools import tools
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from rag.text_splitter import RecursiveCharacterTextSplitter
+from rag.retrieval import load_faiss_index, main_retrieval_agent
+from rag.llm_config.rag_tools import tools
 load_dotenv()
 
 client = OpenAI()
