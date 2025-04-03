@@ -3,18 +3,13 @@ import os
 from data_utils import load_documents, load_all_documents, inspect_file
 from rag.rag_pipeline import RAGPipeline
 from rag.retrieval import initialize_faiss_databases
+from rag.retrieval import main_intialise_retrievers
 
 def main():
     print(f"Script running from: {os.getcwd()}")
 
     parser = argparse.ArgumentParser(description="BuffettAI RAG Pipeline")
     
-    # Mutually exclusive group for loading options
-    load_group = parser.add_mutually_exclusive_group(required=True)
-    load_group.add_argument("--data_path", 
-                          help="Path to individual data file (XLSX or PKL)")
-    load_group.add_argument("--load_all", action="store_true",
-                          help="Load all standard files from data/ directory")
     
     # Other arguments
     parser.add_argument("--inspect", action="store_true",
@@ -23,9 +18,7 @@ def main():
                        help="Query to process")
     parser.add_argument("--company", default="NVIDIA",
                        help="Company name for report")
-    parser.add_argument("--method", default="ensemble", 
-                       choices=["bm25", "faiss", "ensemble"],
-                       help="Retrieval method")
+
     
     args = parser.parse_args()
 
@@ -40,20 +33,11 @@ def main():
             inspect_file(args.data_path)
         return
 
-    # Document loading
-    if args.load_all:
-        print("Loading all standard documents from data/ directory...")
-        raw_docs = load_all_documents(base_path="../data")
-        vectorstores = initialize_faiss_databases(raw_docs)
-    else:
-        doc_name = os.path.basename(args.data_path)
-        raw_docs = load_documents(args.data_path)
-        vectorstores = initialize_faiss_databases({doc_name: raw_docs})
     
     # Initialize and run pipeline
-    pipeline = RAGPipeline(raw_docs)
+    pipeline = RAGPipeline()
     report, evaluation = pipeline.process_query(
-        args.query, args.company, method=args.method
+        args.query, args.company
     )
     
     # Output results
