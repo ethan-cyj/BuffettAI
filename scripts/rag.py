@@ -16,8 +16,7 @@ def main():
                        help="Show file structure before loading")
     parser.add_argument("--query", default="What are NVIDIA's recent initiatives?",
                        help="Query to process")
-    parser.add_argument("--company", default="NVIDIA",
-                       help="Company name for report")
+
 
     
     args = parser.parse_args()
@@ -36,7 +35,7 @@ def main():
     
     # Initialize and run pipeline
     rag_pipeline = RAGPipeline(llm_type="ollama")
-    response = rag_pipeline.process_query(args.query, args.company)
+    response = rag_pipeline.process_query(args.query)
     
     # Output results
     print("Generated Response: ", response)
