@@ -34,7 +34,7 @@ class RAGPipeline:
         self.llm_type = llm_type
         self.custom_llm = custom_llm
         
-        if llm_type == "openai":
+        if llm_type == "openai" or llm_type == "ollama":
             self.client = OpenAI()
         
         self._initialize_retrievers()
@@ -69,6 +69,11 @@ class RAGPipeline:
         """Internal method for OpenAI API calls"""
         try:
             messages = []
+            print("###########PRINTING PROMPT############")
+            print(prompt)
+            print("###########PRINTING context############")
+            print(context)
+            context = "You are Warren Buffett, the CEO of Berkshire Hathaway. Use only the docuements provided to answer the question." 
             if context:
                 messages.append({"role": "system", "content": context})
             messages.append({"role": "user", "content": prompt})
@@ -91,8 +96,8 @@ class RAGPipeline:
         """
         full_prompt = f"{prompt}\n{context}" if context else prompt
         data = {
-            "model": "ollama_buffett",
-            "prompt": full_prompt,
+            "model": "ollama_buffett_v2",
+            "prompt": "You are Warren Buffett, the CEO of Berkshire Hathaway. Use only the docuements provided to answer the question. " + full_prompt,
             "stream": False
         }
         try:
@@ -106,11 +111,11 @@ class RAGPipeline:
             return f"Error generating response: {str(e)}"
 
 
-    def generate_report(self, query: str, company_name: str, documents: Optional[List[Document]] = None) -> tuple:
+    def generate_report(self, query: str, documents: Optional[List[Document]] = None) -> tuple:
         """
         Generates a report using retrieved documents.
         """
-        prompt = create_prompt(query, company_name, documents)
+        prompt = create_prompt(query, documents)
         context_text = "\n".join(self.context_memory)
         
         report = self.generate_text(prompt, context=context_text)
@@ -128,7 +133,7 @@ class RAGPipeline:
         eval_prompt = create_evaluation_prompt(query, report, documents)
         return self.generate_text(eval_prompt)
 
-    def evaluate_response(self, query: str, response: str) -> str:
+    def evaluate_response(self, query: str, response: str, documents: str) -> str:
         """
         Evaluates the generated response.
         """
@@ -136,7 +141,8 @@ class RAGPipeline:
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": RAG_EVALUATION_SYSTEM_PROMPT},
-                {"role": "user", "content": response}
+                {"role": "user", "content": response},
+                {"role": "user", "content": f'document={documents}'},
             ],
             response_format=RAGEvaluation,
             temperature=0,
@@ -153,14 +159,15 @@ class RAGPipeline:
         print(f'Overall Score: {result.overall_score}')
         return result.overall_score
 
-    def process_query(self, query: str, company_name: str) -> tuple:
+    def process_query(self, query: str) -> tuple:
         """
         Main method to process a query through the RAG pipeline.
         """
         context_text = "\n".join(self.context_memory)
         documents = main_routing_function(query)
-        response = self.generate_text(query, context=context_text)
-        evaluation = self.evaluate_response(query, response)
+        prompt = create_prompt(query, documents)
+        response = self.generate_text(prompt, context=context_text)
+        evaluation = self.evaluate_response(prompt, response, documents)
         # report = self.generate_report(query, company_name, documents)
         # evaluation = self.evaluate_report(query, report, documents)
         

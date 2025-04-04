@@ -2,7 +2,7 @@ from typing import List, Dict, Any, Optional, Literal
 from langchain_core.documents import Document   
 from pydantic import BaseModel, Field
 
-def create_prompt(query: str, company_name: str, documents: List[Document]) -> str:
+def create_prompt(query: str,  documents: List[Document]) -> str:
     """
     Creates a focused prompt for the LLM using both the query and retrieved documents.
     
@@ -18,7 +18,7 @@ def create_prompt(query: str, company_name: str, documents: List[Document]) -> s
                         for i, doc in enumerate(documents)])
     
     prompt = f"""
-**Task**: Generate a comprehensive investment report for {company_name} that specifically addresses: 
+**Task**: Generate a comprehensive investment report for  that specifically addresses: 
 "{query}"
 
 **Context from company documents**:
@@ -42,7 +42,7 @@ def create_prompt(query: str, company_name: str, documents: List[Document]) -> s
 [Detailed Analysis] - Expanded discussion with supporting data
 [Conclusions] - Summary and forward-looking statements
 
-**Begin Report for {company_name}**:
+**Begin Report for **:
 """
     return prompt.strip()
 

@@ -31,11 +31,13 @@ def function_calling_agent(query: str):
     )
     if response.choices[0].message.tool_calls:
         args = [call.function.arguments for call in response.choices[0].message.tool_calls]
-        # print(args)
+        print("##########PRINTING ARGS##########")
+        print(args)
     else:
         # args = ['{"data_source": "news"}', '{"data_source": "qna"}',  '{"data_source": "trades"}',  '{"data_source": "shareholder_letters"}']
         args = None
-        # print(args)
+        print("##########PRINTING ARGS##########")
+        print(args)
     return args
 
 def retrieval_agent(query: str, data_sources: Optional[List[str]] = None):
