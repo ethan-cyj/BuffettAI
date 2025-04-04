@@ -156,8 +156,7 @@ class RAGPipeline:
         print(f'Query Relevance: {result.query_relevance}')
         print(f'Data Accuracy: {result.data_accuracy}')
         print(f'Clarity: {result.clarity}')
-        print(f'Overall Score: {result.overall_score}')
-        return result.overall_score
+        return sum([int(result.query_relevance), int(result.data_accuracy), int(result.clarity)]) / 3
 
     def process_query(self, query: str) -> tuple:
         """

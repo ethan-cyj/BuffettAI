@@ -145,6 +145,4 @@ class RAGEvaluation(BaseModel):
                                  Output 1 if it is not clear - requires a lot of additional context to understand.
                                  Output 0 if the response is not clear and cannot be understood by a layman.
                                  """)
-    overall_score: float = Field(...,
-                                 description = "Average of all the scores above")
-    
+
