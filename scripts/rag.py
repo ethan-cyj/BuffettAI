@@ -35,16 +35,11 @@ def main():
 
     
     # Initialize and run pipeline
-    pipeline = RAGPipeline()
-    report, evaluation = pipeline.process_query(
-        args.query, args.company
-    )
+    rag_pipeline = RAGPipeline(llm_type="ollama")
+    response = rag_pipeline.process_query(args.query, args.company)
     
     # Output results
-    print("\nGenerated Report:")
-    print(report)
-    print("\nEvaluation:")
-    print(evaluation)
+    print("Generated Response: ", response)
 
 if __name__ == "__main__":
     main()

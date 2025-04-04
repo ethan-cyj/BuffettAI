@@ -29,9 +29,13 @@ def function_calling_agent(query: str):
     messages=[{"role": "user", "content": query}],
     tools=tools,
     )
-
-    args = [call.function.arguments for call in response.choices[0].message.tool_calls]
-    print(args)
+    if response.choices[0].message.tool_calls:
+        args = [call.function.arguments for call in response.choices[0].message.tool_calls]
+        # print(args)
+    else:
+        # args = ['{"data_source": "news"}', '{"data_source": "qna"}',  '{"data_source": "trades"}',  '{"data_source": "shareholder_letters"}']
+        args = None
+        # print(args)
     return args
 
 def retrieval_agent(query: str, data_sources: Optional[List[str]] = None):
