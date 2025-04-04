@@ -18,12 +18,12 @@ async def startup_event():
     logger.info(f"Files in data directory: {os.listdir('data') if os.path.exists('data') else 'No data dir'}")
     logger.info("Initializing RAG pipeline...")
     global rag_pipeline
-    # rag_pipeline = RAGPipeline(llm_type="ollama")
-    rag_pipeline = RAGPipeline(llm_type="openai")
+    rag_pipeline = RAGPipeline(llm_type="ollama")
+    # rag_pipeline = RAGPipeline(llm_type="openai")
     logger.info("RAG pipeline initialized")
 # init rag pipeline
-# rag_pipeline = RAGPipeline(llm_type="ollama")
-rag_pipeline = RAGPipeline(llm_type="openai")
+rag_pipeline = RAGPipeline(llm_type="ollama")
+# rag_pipeline = RAGPipeline(llm_type="openai")
 
 # req model
 class QueryRequest(BaseModel):
