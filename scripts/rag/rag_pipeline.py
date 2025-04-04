@@ -10,6 +10,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from rag.retrieval import main_intialise_retrievers
 from rag.prompt_engineering import create_prompt, create_evaluation_prompt
+from rag.prompt_engineering import RAG_EVALUATION_SYSTEM_PROMPT, RAGEvaluation
 from rag.agent import main_routing_function
 
 
@@ -123,10 +124,34 @@ class RAGPipeline:
     def evaluate_report(self, query: str, report: str, documents: List[Document]) -> str:
         """
         Evaluates the generated report.
-        Evaluates the generated report.
         """
         eval_prompt = create_evaluation_prompt(query, report, documents)
         return self.generate_text(eval_prompt)
+
+    def evaluate_response(self, query: str, response: str) -> str:
+        """
+        Evaluates the generated response.
+        """
+        response = self.client.beta.chat.completions.parse(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": RAG_EVALUATION_SYSTEM_PROMPT},
+                {"role": "user", "content": response}
+            ],
+            response_format=RAGEvaluation,
+            temperature=0,
+            seed = 42,
+            max_tokens=1500
+        )
+        result = response.choices[0].message.parsed
+        if result is None:
+            print("Failed to parse response")
+            return None
+        print(f'Query Relevance: {result.query_relevance}')
+        print(f'Data Accuracy: {result.data_accuracy}')
+        print(f'Clarity: {result.clarity}')
+        print(f'Overall Score: {result.overall_score}')
+        return result.overall_score
 
     def process_query(self, query: str, company_name: str) -> tuple:
         """
@@ -135,11 +160,15 @@ class RAGPipeline:
         context_text = "\n".join(self.context_memory)
         documents = main_routing_function(query)
         response = self.generate_text(query, context=context_text)
+        evaluation = self.evaluate_response(query, response)
         # report = self.generate_report(query, company_name, documents)
         # evaluation = self.evaluate_report(query, report, documents)
         
         # return report, evaluation
-        return response
+        return {
+            "response": response,
+            "evaluation": evaluation
+        }
     
 
 # testing
