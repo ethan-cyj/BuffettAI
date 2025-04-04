@@ -36,3 +36,7 @@ tf-keras
 tiktoken
 
 googlesearch-python
+
+# api
+fastapi
+univorn
