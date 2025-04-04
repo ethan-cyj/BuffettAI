@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from typing import List, Dict, Any, Optional, Callable
 from langchain_core.documents import Document
+import requests
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -58,6 +59,8 @@ class RAGPipeline:
             return self.custom_llm(prompt, context)
         elif self.llm_type == "openai":
             return self._call_openai(prompt, context)
+        elif self.llm_type == "ollama":
+            return self._call_ollama(prompt, context)
         else:
             raise ValueError("Invalid LLM configuration")
 
@@ -79,6 +82,28 @@ class RAGPipeline:
         except Exception as e:
             print(f"Error calling OpenAI: {e}")
             return f"Error generating response: {str(e)}"
+    
+    def _call_ollama(self, prompt: str, context: str = "") -> str:
+        """
+        Calls the local Ollama model endpoint.
+        Combines prompt and context and sends them to the Ollama API.
+        """
+        full_prompt = f"{prompt}\n{context}" if context else prompt
+        data = {
+            "model": "ollama_buffett",
+            "prompt": full_prompt,
+            "stream": False
+        }
+        try:
+            response = requests.post("http://localhost:11434/api/generate", json=data)
+            response.raise_for_status()
+            json_response = response.json()
+            # Extract generated text from the "response" field.
+            return json_response.get("response", "")
+        except requests.RequestException as e:
+            print(f"Error calling Ollama: {e}")
+            return f"Error generating response: {str(e)}"
+
 
     def generate_report(self, query: str, company_name: str, documents: Optional[List[Document]] = None) -> tuple:
         """
@@ -107,15 +132,18 @@ class RAGPipeline:
         """
         Main method to process a query through the RAG pipeline.
         """
+        context_text = "\n".join(self.context_memory)
         documents = main_routing_function(query)
-        report = self.generate_report(query, company_name, documents)
-        evaluation = self.evaluate_report(query, report, documents)
+        response = self.generate_text(query, context=context_text)
+        # report = self.generate_report(query, company_name, documents)
+        # evaluation = self.evaluate_report(query, report, documents)
         
-        return report, evaluation
+        # return report, evaluation
+        return response
     
 
 # testing
-print(os.path.dirname(os.path.abspath(__file__)))
-print(f"Script running from: {os.getcwd()}")
-rag_pipeline = RAGPipeline()
-print(rag_pipeline.process_query("What did Buffett say about Tesla?", "Tesla"))
+# print(os.path.dirname(os.path.abspath(__file__)))
+# print(f"Script running from: {os.getcwd()}")
+# rag_pipeline = RAGPipeline(llm_type="ollama")
+# print(rag_pipeline.process_query("Who are you and tell me about Tesla?", "Tesla"))
