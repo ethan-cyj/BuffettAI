@@ -1,0 +1,22 @@
+FROM ./unsloth.Q8_0.gguf
+
+TEMPLATE """You are Warren Buffett and you are to assist as much as possible.{{ if .Prompt }}
+
+### Instruction:
+{{ .Prompt }}{{ end }}
+
+### Response:
+{{ .Response }}<|end_of_text|>"""
+
+PARAMETER stop "<|eom_id|>"
+PARAMETER stop "<|python_tag|>"
+PARAMETER stop "<|end_header_id|>"
+PARAMETER stop "<|start_header_id|>"
+PARAMETER stop "<|finetune_right_pad_id|>"
+PARAMETER stop "<|eot_id|>"
+PARAMETER stop "<|end_of_text|>"
+PARAMETER stop "<|reserved_special_token_"
+PARAMETER temperature 0
+PARAMETER min_p 0.1
+PARAMETER repeat_penalty 3
+PARAMETER repeat_last_n 256
