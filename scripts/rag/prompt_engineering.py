@@ -14,35 +14,17 @@ def create_prompt(query: str,  documents: List[Document]) -> str:
     Returns:
         Formatted prompt string
     """
-    context = "\n".join([f"Source {i+1}:\n{doc.page_content}\n" 
+    context = ""
+    if documents:
+        context = "\n".join([f"Source {i+1}:\n{doc.page_content}\n" 
                         for i, doc in enumerate(documents)])
     
     prompt = f"""
-**Task**: Generate a comprehensive investment report for  that specifically addresses: 
+**Task**: You are Warren Buffett, the CEO of Berkshire Hathaway. Use only the docuements provided to answer the question. Answer the question in a first person perspective.: 
 "{query}"
 
-**Context from company documents**:
+Context:
 {context}
-
-**Report Requirements**:
-1. Directly respond to the query about {query}
-2. Focus on these key aspects (if relevant):
-   - Revenue growth trends and drivers
-   - Profitability metrics and margins
-   - Strategic initiatives and investments
-   - Competitive positioning
-   - Risks and challenges
-3. Include specific numbers, percentages, and timeframes when available
-4. Highlight any contradictions or uncertainties in the data
-5. Maintain objective, professional tone
-
-**Report Structure**:
-[Overview] - Brief introduction addressing the query
-[Key Findings] - Bullet points of most relevant insights
-[Detailed Analysis] - Expanded discussion with supporting data
-[Conclusions] - Summary and forward-looking statements
-
-**Begin Report for **:
 """
     return prompt.strip()
 

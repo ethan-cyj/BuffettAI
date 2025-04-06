@@ -29,6 +29,8 @@ def function_calling_agent(query: str):
     messages=[{"role": "user", "content": query}],
     tools=tools,
     )
+    print("##########PRINTING FUNCTION CALLING AGENT RESPONSE##########")
+    print(response)
     if response.choices[0].message.tool_calls:
         args = [call.function.arguments for call in response.choices[0].message.tool_calls]
         print("##########PRINTING ARGS##########")
@@ -40,30 +42,33 @@ def function_calling_agent(query: str):
         print(args)
     return args
 
-def retrieval_agent(query: str, data_sources: Optional[List[str]] = None):
+def retrieval_agent(query: str, function_args: Optional[List[str]] = None):
     """
     Returns a list of documents from a given vector store.
     If no data sources are provided, it will search the web for the most relevant documents.
     """
+    data_sources, llm_type_list = consolidate_outputs(function_args)
+    llm_type = llm_type_list[0]
     if data_sources is None:
         # call web source agent to retrieve documents
         documents = main_search_agent(query)
         if documents is None:
-            return None
+            return None, llm_type
         else:
-            return documents
+            return documents, llm_type
     else:
         # Retrieve from vector store
-        search_sources =[json.loads(data_source).get("data_source") for data_source in data_sources]
+        search_sources = data_sources
         documents = main_retrieval_agent(query=query, data_sources=search_sources)
         if documents is None:
             # call web source agent to retrieve documents
             documents = main_search_agent(query)
             if documents is None:
-                return None
+                return None, llm_type
             else:
-                return documents    
-        return documents
+                return documents, llm_type
+        return documents, llm_type
+    
 def _google_search(query, num_results=5, lang='en'):
     """
     Perform a Google search and return a list of URLs.
@@ -175,6 +180,46 @@ def main_routing_function(query: str):
     """
     Main routing function that orchestrates the retrieval of documents from vector store or web search.
     """
-    data_sources = function_calling_agent(query)
-    return retrieval_agent(query, data_sources)
+    function_args = function_calling_agent(query)
+    return retrieval_agent(query, function_args)
 
+
+def consolidate_outputs(output_list):
+    """
+    Consolidate a list of JSON strings into two lists:
+    one for data sources and one for models.
+    
+    Args:
+        output_list (List[str]): List of JSON strings, e.g.,
+            ['{"data_source": "qna", "model": "openai"}', '{"data_source": "shareholder_letters", "model": "openai"}']
+
+    Returns:
+        tuple: (data_sources, models) where both are lists of strings, without duplicates and ignoring "none" data sources.
+    """
+    if not output_list:
+        return None, ["openai"]
+    data_sources_set = set()
+    models_set = set()
+    
+    for item in output_list:
+        try:
+            parsed = json.loads(item)
+            ds = parsed.get("data_source", "").strip()
+            mdl = parsed.get("model", "").strip()
+            # Only add if ds is not empty or "none"
+            if ds and ds.lower() != "none":
+                data_sources_set.add(ds)
+            if mdl and mdl.lower() != "none":
+                models_set.add(mdl)
+        except json.JSONDecodeError as e:
+            print(f"Error parsing JSON: {e}")
+            continue
+
+    # Convert sets to lists; note: order is not preserved.
+    data_sources = list(data_sources_set)
+    models = list(models_set)
+    if not data_sources:
+        data_sources = None
+    if not models:
+        models = ["openai"]
+    return data_sources, models

@@ -51,14 +51,14 @@ class RAGPipeline:
             print("Initializing BM25 and FAISS indexes...")
             main_intialise_retrievers()
     
-    def generate_text(self, prompt: str, context: str = "") -> str:
+    def generate_text(self, prompt: str, context: str = "", llm_type: str = "openai") -> str:
         """
         Unified text generation interface.
         Routes to OpenAI or custom LLM based on configuration.
         """
-        if self.llm_type == "custom" and self.custom_llm:
-            return self.custom_llm(prompt, context)
-        elif self.llm_type == "openai":
+
+        self.llm_type = llm_type
+        if self.llm_type == "openai":
             return self._call_openai(prompt, context)
         elif self.llm_type == "ollama":
             return self._call_ollama(prompt, context)
@@ -96,7 +96,8 @@ class RAGPipeline:
         """
         full_prompt = f"{prompt}\n{context}" if context else prompt
         data = {
-            "model": "ollama_buffett_v2",
+            "model": "ollama_buffett",
+            # "model": "ollama_buffett_v2",
             "prompt": "You are Warren Buffett, the CEO of Berkshire Hathaway. Use only the docuements provided to answer the question. " + full_prompt,
             "stream": False
         }
@@ -163,17 +164,17 @@ class RAGPipeline:
         Main method to process a query through the RAG pipeline.
         """
         context_text = "\n".join(self.context_memory)
-        documents = main_routing_function(query)
+        documents, llm_type_new = main_routing_function(query)
         prompt = create_prompt(query, documents)
-        response = self.generate_text(prompt, context=context_text)
-        evaluation = self.evaluate_response(prompt, response, documents)
+        response = self.generate_text(prompt, context=context_text, llm_type=llm_type_new)
+        evaluation_score = self.evaluate_response(prompt, response, documents)
         # report = self.generate_report(query, company_name, documents)
         # evaluation = self.evaluate_report(query, report, documents)
         
         # return report, evaluation
         return {
             "response": response,
-            "evaluation": evaluation
+            "evaluation_score": evaluation_score
         }
     
 
