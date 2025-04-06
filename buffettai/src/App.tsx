@@ -52,33 +52,79 @@ function App() {
     setActiveTab(newActiveTab);
   };
 
-  // Function to handle sending messages
+  const [loading, setLoading] = useState(false);
+
   const handleSend = async () => {
     if (!input.trim()) return;
-
-    // Add user message to the current active tab
+  
     const userMessage = { sender: 'user', text: input };
     setMessages((prev) => ({
       ...prev,
       [activeTab]: [...prev[activeTab], userMessage],
     }));
-
-    // Clear input field
+  
     setInput('');
-
-    // Simulate bot response
+    setLoading(true);  // <-- start loading
+  
     const botResponse = await getBotResponse(input);
+    
     setMessages((prev) => ({
       ...prev,
       [activeTab]: [...prev[activeTab], { sender: 'bot', text: botResponse }],
     }));
+  
+    setLoading(false);  // <-- stop loading
   };
+  // Function to handle sending messages
+  // const handleSend = async () => {
+  //   if (!input.trim()) return;
+
+  //   // Add user message to the current active tab
+  //   const userMessage = { sender: 'user', text: input };
+  //   setMessages((prev) => ({
+  //     ...prev,
+  //     [activeTab]: [...prev[activeTab], userMessage],
+  //   }));
+
+  //   // Clear input field
+  //   setInput('');
+
+  //   // Simulate bot response
+  //   const botResponse = await getBotResponse(input);
+  //   setMessages((prev) => ({
+  //     ...prev,
+  //     [activeTab]: [...prev[activeTab], { sender: 'bot', text: botResponse }],
+  //   }));
+  // };
 
   // Simulate the bot's response (you can replace this with a real API call)
-  const getBotResponse = async (message:string) => {
-    return `Your question is "${message}". Here's some wisdom: "Invest in yourself!"`;
+  // const getBotResponse = async (message:string) => {
+  //   return `Your question is "${message}". Here's some wisdom: "Invest in yourself!"`;
+  // };
+
+  const getBotResponse = async (message: string) => {
+    try {
+      const response = await fetch("http://127.0.0.1:8000/query", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          query: message,
+          company: "Buffett Inc."  // Replace with dynamic company name if needed
+        })
+      });
+  
+      const data = await response.json();
+      return `${data.response} (Score: ${data.evaluation_score})`;
+  
+    } catch (error) {
+      console.error("Error talking to backend:", error);
+      return "Oops! Something went wrong talking to the backend.";
+    }
   };
 
+  
   // Function to handle instructions modal
   const handleInstructions = () => {
     setShowInstructions(true);
@@ -131,6 +177,13 @@ function App() {
             {msg.text}
           </div>
         ))}
+
+        {/* 👇 Loading Spinner Message */}
+        {loading && (
+          <div className="message bot-message loading-spinner">
+            BuffettAI is thinking...
+          </div>
+        )}
       </div>
 
       {/* Chat Input */}
@@ -161,6 +214,14 @@ function App() {
     </div>
   );
 }
+
+
+export default App;
+
+
+
+
+
 
 // function App() {
 //   const [messages, setMessages] = useState<{ sender: string; text: string }[]>([]);
@@ -239,5 +300,3 @@ function App() {
 //     </div>
 //   );
 // }
-
-export default App;
