@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import './App.css';
 import logo_img from "./assets/logo.png";
 
@@ -103,6 +104,7 @@ function App() {
   // };
 
   const getBotResponse = async (message: string) => {
+    console.log("Sending message:", message); // debugging log
     try {
       const response = await fetch("http://127.0.0.1:8000/query", {
         method: "POST",
@@ -110,13 +112,12 @@ function App() {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          query: message,
-          company: "Buffett Inc."  // Replace with dynamic company name if needed
+          query: message
         })
       });
   
       const data = await response.json();
-      return `${data.response} (Score: ${data.evaluation_score})`;
+      return `${data.response}\n\n(Evaluation Score: ${data.evaluation_score})`;
   
     } catch (error) {
       console.error("Error talking to backend:", error);
@@ -174,7 +175,11 @@ function App() {
             key={index}
             className={`message ${msg.sender === 'user' ? 'user-message' : 'bot-message'}`}
           >
-            {msg.text}
+            {msg.sender === 'bot' ? (
+              <ReactMarkdown>{msg.text}</ReactMarkdown>
+            ) : (
+              msg.text
+            )}  
           </div>
         ))}
 
