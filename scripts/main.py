@@ -2,6 +2,7 @@ import os
 import logging
 import traceback
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from rag.rag_pipeline import RAGPipeline  # Your existing RAG pipeline
 import uvicorn
@@ -11,6 +12,19 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI()
+
+origins = [
+    "http://localhost:5173",
+]
+
+# Add CORS middleware to your app
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,        
+    allow_credentials=True,
+    allow_methods=["*"],          
+    allow_headers=["*"],          
+)
 
 @app.on_event("startup")
 async def startup_event():
@@ -38,7 +52,6 @@ async def process_query(request: QueryRequest):
 
     try:
         # process query with rag pipeline
-        # report, evaluation = rag_pipeline.process_query(request.query, request.company)
         response = rag_pipeline.process_query(request.query)
     except Exception as e:
         tb = traceback.format_exc()
