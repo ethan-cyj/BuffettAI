@@ -14,6 +14,17 @@ body {
   margin-bottom: 20px;
 }
 
+.loading-spinner {
+  font-style: italic;
+  color: #666;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.4; }
+  50% { opacity: 1; }
+  100% { opacity: 0.4; }
+}
 .tab-buttons button {
   background-color: #2E3192;
   color: #fff;

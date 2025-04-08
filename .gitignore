@@ -172,4 +172,11 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+
+exp.py
+.faiss_indexes/
+.bm25_indexes/
+.env
+
 scripts/finetune/oopere-FinChat-XS/model.safetensors
