@@ -127,4 +127,11 @@ class RAGEvaluation(BaseModel):
                                  Output 1 if it is not clear - requires a lot of additional context to understand.
                                  Output 0 if the response is not clear and cannot be understood by a layman.
                                  """)
-
+    buffet_likeness: Literal[0, 1, 2, 3] = Field(...,
+                                description="""
+                                How well does the response capture Warren Buffett’s style, wisdom, and personality?
+                                Output 3 if the response mimics a perfect Buffett-like persona.
+                                Output 2 if it is somewhat similar to Warren Buffett's persona.
+                                Output 1 if it is has little resemblance to Warren Buffett.
+                                Output 0 if the response shows no resemblance to Warren Buffett.
+                                """)

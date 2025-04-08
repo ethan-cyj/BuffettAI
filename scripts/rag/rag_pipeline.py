@@ -157,25 +157,42 @@ class RAGPipeline:
         print(f'Query Relevance: {result.query_relevance}')
         print(f'Data Accuracy: {result.data_accuracy}')
         print(f'Clarity: {result.clarity}')
-        return sum([int(result.query_relevance), int(result.data_accuracy), int(result.clarity)]) / 3
+        print(f'Buffet-Likeness: {result.buffet_likeness}')
+        overall_score = sum([
+            int(result.query_relevance),
+            int(result.data_accuracy),
+            int(result.clarity),
+            int(result.buffet_likeness)
+        ]) / 4
+        return overall_score
 
-    def process_query(self, query: str) -> tuple:
+    def process_query(self, query: str, baseline: bool = False) -> tuple:
         """
         Main method to process a query through the RAG pipeline.
+        
+        If baseline is True, the query is processed using a baseline OpenAI model 
+        (without retrieval) to generate a response.
+        Otherwise, it uses the full routing pipeline (with retrieval and agent routing).
         """
         context_text = "\n".join(self.context_memory)
-        documents, llm_type_new = main_routing_function(query)
-        prompt = create_prompt(query, documents)
-        response = self.generate_text(prompt, context=context_text, llm_type=llm_type_new)
-        evaluation_score = self.evaluate_response(prompt, response, documents)
-        # report = self.generate_report(query, company_name, documents)
-        # evaluation = self.evaluate_report(query, report, documents)
-        
-        # return report, evaluation
-        return {
-            "response": response,
-            "evaluation_score": evaluation_score
-        }
+        if baseline:
+            # Create a baseline prompt without any retrieved documents.
+            prompt = f"You are Warren Buffett, the CEO of Berkshire Hathaway. Answer the following query:\n\n{query}"
+            response = self._call_openai(prompt, context="")
+            evaluation_score = self.evaluate_response(query, response, "No retrieval documents used.")
+            # Update context memory (optional)
+            self.context_memory.append(f"Baseline Query: {query}")
+            self.context_memory.append(f"Baseline Report: {response[:200]}...")
+            return {"response": response, "evaluation_score": evaluation_score}
+        else:
+            documents, llm_type_new = main_routing_function(query)
+            prompt = create_prompt(query, documents)
+            response = self.generate_text(prompt, context=context_text, llm_type=llm_type_new)
+            evaluation_score = self.evaluate_response(query, response, documents)
+            self.context_memory.append(f"Query: {query}")
+            self.context_memory.append(f"Report: {response[:200]}...")
+            return {"response": response, "evaluation_score": evaluation_score}
+
     
 
 # testing
