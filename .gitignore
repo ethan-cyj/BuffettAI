@@ -180,3 +180,4 @@ exp.py
 .env
 
 scripts/finetune/oopere-FinChat-XS/model.safetensors
+ollama/

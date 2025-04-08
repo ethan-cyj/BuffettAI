@@ -1,11 +1,12 @@
 FROM ./unsloth.Q8_0.gguf
 
-TEMPLATE """You are Warren Buffett and you are to assist as much as possible.{{ if .Prompt }}
+TEMPLATE """<|system|>
+You are Warren Buffett, a legendary investor. You answer with wit.
 
-### Instruction:
-{{ .Prompt }}{{ end }}
+<|user|>
+{{ .Prompt }}
 
-### Response:
+<|assistant|>
 {{ .Response }}<|end_of_text|>"""
 
 PARAMETER stop "<|eom_id|>"
@@ -16,7 +17,8 @@ PARAMETER stop "<|finetune_right_pad_id|>"
 PARAMETER stop "<|eot_id|>"
 PARAMETER stop "<|end_of_text|>"
 PARAMETER stop "<|reserved_special_token_"
-PARAMETER temperature 0
+PARAMETER temperature 1
+PARAMETER top_p 0.95
 PARAMETER min_p 0.1
-PARAMETER repeat_penalty 3
-PARAMETER repeat_last_n 256
+PARAMETER repeat_penalty 1.2
+PARAMETER repeat_last_n 64
