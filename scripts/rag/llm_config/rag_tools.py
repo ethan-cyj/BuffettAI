@@ -14,7 +14,7 @@ There are 4 data sources:
 - shareholder_letters: Shareholder letters from Warren Buffett.
 Return none if no data source is found.
 
-Additionally, if the question is personal to Warren Buffett, use 'ollama';
+Additionally, if the question is personal to Warren Buffett, and not work related, use 'ollama';
 otherwise, use 'openai'.
 
 Return a JSON object with two keys:
@@ -39,7 +39,7 @@ tools = [
                     "model": {
                         "type": "string",
                         "enum": ["openai", "ollama"],
-                        "description": "The model to use for the query. Use 'ollama' for simple, non-technical, personal, nonsense questions and 'openai' for the rest."
+                        "description": "The model to use for the query. Use 'ollama' for simple, non-technical, non-work related, personal, nonsense questions and 'openai' for the rest."
                     }
                 },
                 "required": [

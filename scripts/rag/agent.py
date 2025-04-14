@@ -153,6 +153,8 @@ def main_search_agent(query):
     Returns a list of processed documents ready for RAG.
     """
     all_documents = []
+    query = '"Warren Buffett" AND "long-term investment" AND ' + query
+
     urls = _google_search(query)
     
     for url in urls:
@@ -218,8 +220,11 @@ def consolidate_outputs(output_list):
     # Convert sets to lists; note: order is not preserved.
     data_sources = list(data_sources_set)
     models = list(models_set)
-    if not data_sources:
-        data_sources = None
+    if "ollama" and "openai" in models:
+        models = ["openai"]
     if not models:
         models = ["openai"]
-    return data_sources, models
+    if not data_sources:
+        data_sources = None
+    
+    return data_sources, ["openai"]
