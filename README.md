@@ -23,10 +23,10 @@ BuffettAI is a specialized language model that emulates Warren Buffett’s inves
   pip install -r  requirements.txt
   ```
 
-### Running backend
+## Running backend
 To run backend execute `scripts/main.py`
 
-### Running Frontend
+## Running Frontend
 1. Change directory to frontend folder (buffettai)
   ```bash
   cd buffettai
